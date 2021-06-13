@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>在滴滴的这几年：基于Git的平台文档解决方案 - 张小伦爱学习</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="张伦" /><meta name="description" content="背景 所在团队承接了架构部所有的底层服务的用户系统的建设，包括面向业务方的自助服务系统和面向运维同学的后台系统。随着各系统的不断迭代，系统提供" /><meta name="keywords" content="zhanglun, JS, CSS, Node, 前端, 张伦, 勿忘初心, 方得始终" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.56.0 with theme even" />
+
+
+<link rel="canonical" href="https://zhanglun.github.io/post/2020/10/%E5%9C%A8%E6%BB%B4%E6%BB%B4%E7%9A%84%E8%BF%99%E5%87%A0%E5%B9%B4%E5%9F%BA%E4%BA%8Egit%E7%9A%84%E5%B9%B3%E5%8F%B0%E6%96%87%E6%A1%A3%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500&family=Roboto&display=swap" rel="stylesheet">
+<style>
+  body, .post .post-header .post-title, .logo, .header .site-navbar .menu, .post .post-content h2, .post .post-footer,.post .post-footer .post-nav .prev, .post .post-footer .post-nav .next {
+    font-family: 'Noto Serif SC', 'Roboto', sans-serif !important; 
+  }
+  
+  .post .post-header .post-title, .post .post-content h2 {
+    font-weight: 500 !important;
+  }
+
+  code, pre {
+    font-family: "Roboto", Consolas,Monaco,Menlo,dejavu sans mono,bitstream vera sans mono,courier new,monospace !important;
+  }
+</style>
+
+
+
+<link href="/sass/main.min.f92fd13721ddf72129410fd8250e73152cc6f2438082b6c0208dc24ee7c13fc4.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="在滴滴的这几年：基于Git的平台文档解决方案" />
+<meta property="og:description" content="背景 所在团队承接了架构部所有的底层服务的用户系统的建设，包括面向业务方的自助服务系统和面向运维同学的后台系统。随着各系统的不断迭代，系统提供" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zhanglun.github.io/post/2020/10/%E5%9C%A8%E6%BB%B4%E6%BB%B4%E7%9A%84%E8%BF%99%E5%87%A0%E5%B9%B4%E5%9F%BA%E4%BA%8Egit%E7%9A%84%E5%B9%B3%E5%8F%B0%E6%96%87%E6%A1%A3%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" />
+<meta property="article:published_time" content="2020-10-14T10:28:34+08:00" />
+<meta property="article:modified_time" content="2020-10-14T10:28:34+08:00" />
+<meta itemprop="name" content="在滴滴的这几年：基于Git的平台文档解决方案">
+<meta itemprop="description" content="背景 所在团队承接了架构部所有的底层服务的用户系统的建设，包括面向业务方的自助服务系统和面向运维同学的后台系统。随着各系统的不断迭代，系统提供">
+
+
+<meta itemprop="datePublished" content="2020-10-14T10:28:34&#43;08:00" />
+<meta itemprop="dateModified" content="2020-10-14T10:28:34&#43;08:00" />
+<meta itemprop="wordCount" content="2637">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="在滴滴的这几年：基于Git的平台文档解决方案"/>
+<meta name="twitter:description" content="背景 所在团队承接了架构部所有的底层服务的用户系统的建设，包括面向业务方的自助服务系统和面向运维同学的后台系统。随着各系统的不断迭代，系统提供"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">张小伦爱学习-勿忘初心，方得始终</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">类目</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于我</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">张小伦爱学习-勿忘初心，方得始终</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">类目</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于我</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">在滴滴的这几年：基于Git的平台文档解决方案</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-14 </span>
+        
+          <span class="more-meta"> 2637 words </span>
+          <span class="more-meta"> 6 mins read </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#背景">背景</a></li>
+<li><a href="#文档格式化">文档格式化</a></li>
+<li><a href="#静态站点生成">静态站点生成</a></li>
+<li><a href="#流程设计">流程设计</a></li>
+<li><a href="#docbuilder">DocBuilder</a></li>
+<li><a href="#提升开发体验">提升开发体验</a></li>
+<li><a href="#增加内容反馈-帮助提升文档质量">增加内容反馈，帮助提升文档质量</a></li>
+<li><a href="#结束语">结束语</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      
+
+<h2 id="背景">背景</h2>
+
+<p>所在团队承接了架构部所有的底层服务的用户系统的建设，包括面向业务方的自助服务系统和面向运维同学的后台系统。随着各系统的不断迭代，系统提供的自助化能力越来越强大。在滴滴，业务方在业务中通常是同时使用多个基础服务来支撑业务需求。比方说，使用MySQL服务存储数据，使用Redis服务缓存数据，使用ES服务做数据检索。但是这些服务的用户系统最初都是独立的域名，彼此之间没有联系，除了输入域名访问，没有其他入口。导致当时系统访问方式都是口口相传。</p>
+
+<p>为了提升用户使用的体验，同时打造部门影响力，在统一了系统的UI风格之后，逐渐往平台化的方向走，成立了基础服务平台，将这些服务相关的信息收拢在一个平台，以统一的用户界面提供给业务方。</p>
+
+<p>入口收敛了，服务和部门对外宣传和推广的口子也有了。运行了一段时间之后，其他部门提供基础通用能力的团队也将自家服务或者应用接入到了平台。</p>
+
+<p>但是服务的一些文档还处于“信息孤岛”的状态。不同服务团队各自维护和管理自家文档的方式大不相同。即使是在架构部内部，由于历史原因，文档管理方式也是五花八门，更别提其他部门了。通过对一些团队的走访和调研，发现主要有一下几种管理文档的方式：</p>
+
+<ol>
+<li>使用内部的wiki系统维护</li>
+<li>通过开源工具自己部署维护</li>
+</ol>
+
+<p>内部wiki系统有大量的文档数据，通过搜索往往不能找到自己想要的东西。虽然有空间搜索，但是前提是你要知道对应的入口链接。</p>
+
+<p>使用开源工具自己维护文档单独部署，需要有同学专门维护。除了要解决入口的问题之外，还存在功能不完善的问题，比如：不支持搜索。</p>
+
+<p>而我们想做的事情，说白了就是：在平台的基础上，为服务提供统一的文档管理和展示的窗口。降低维护成本，提升文档的可用性。（同时提升平台的用户粘性。狗头</p>
+
+<h2 id="文档格式化">文档格式化</h2>
+
+<p>说到程序员写文档，不由自主地想到markdown。Markdown 是一种轻量级的标记语言，常用与文章排版，通过markdown parser能markdown转换成我们想要的内容，甚至还能自定义解析器来实现自定义语法的转换。markdown的有很多好处：</p>
+
+<ol>
+<li>语法简单，专注写作内容</li>
+<li>支持自定义语法拓充</li>
+<li>轻松导出html，pdf 或者json等数据</li>
+<li>纯文本内容，可读，直观，学习成本低</li>
+<li>Vistual Stdio Code 和 Gitlab等支持高亮和预览</li>
+</ol>
+
+<h2 id="静态站点生成">静态站点生成</h2>
+
+<p>类似 Hexo, Hugo之类的静态站点生成工具种类非常多，除了 Hexo，Hugo这种主要用在静态博客场景的，还有类似 Gastby，Docusaurus 等定位是面向开源文档的书写。尤其是 Gastby，基于React，Node.js 和 GrapQL的功能强大的工具。静态站点生成有很多优点：</p>
+
+<ol>
+<li>可靠安全稳定</li>
+<li>版本可控制</li>
+<li>易于部署，提交即上线</li>
+<li>灵活，易于定制</li>
+</ol>
+
+<p>回顾一下原始诉求</p>
+
+<ol>
+<li>降低维护成本。开发人员只要写文档就行，不用关心部署和展示之类的</li>
+<li>提升可用性。文档最多的就是搜索，使用全文搜索，提高搜索效率。建立反馈机制，帮助提升文档质量。</li>
+</ol>
+
+<p>往简单了来看，我们的诉求似乎就是编写 Markdown 原文件然后转换成页面，这些工具可以帮助我们轻松实现。但是，轻量级的类似 Hexo，Hugo 定制性太差，重量级的 Gastby 虽功能强大，但是对我们的场景来说有点大材小用，引入了 GraphQL，整合到我们现有技术体系有点困难。</p>
+
+<p>那怎么办呢？仔细想想，如果将 Markdown 原文件转换成页面这个过程拆分成 Markdown 原文件转换成数据，使用数据渲染出页面呢？这是不是就变成了一个简单的日常web开发？</p>
+
+<p><img src="./images/1.png" alt="1.png" /></p>
+
+<p>对于文档维护者来说，一次文档部署的过程应该是如下图所示：</p>
+
+<p><img src="./images/2.png" alt="2.png" /></p>
+
+<p>在目前的场景中，三个简单的步骤还不足以支撑完备的业务需求。</p>
+
+<ol>
+<li>平台包含的服务数量过百。如果所有内容放在一个仓库中，仓库体积会越来越大，每次构建的时间也会越来越长。</li>
+<li>需要支持搜索。如果直接编译成HTML，全文搜索只能使用前端方案，不利于后续拓展，同时文档数据的使用场景也将受限与前端场景。</li>
+</ol>
+
+<p>于是乎，在上述的流程中补充一点细节。</p>
+
+<h2 id="流程设计">流程设计</h2>
+
+<p>创建一个Git repo 组，每个服务都是单独的一个仓库。通过约定的持续集成流水线配置，可以实现每个仓库的单独构建和部署。 负责编辑的同学只需要关注自己的仓库即可。</p>
+
+<p>构建过程中，将仓库中每一个文档都转换成JSON数据，存入MySQL中。再使用定时任务，采集bingLog 日志，导入到ElasticSearch中。使用MySQL中的数据用于页面的渲染，使用ElasticSearch的数据实现全局搜索。</p>
+
+<p><img src="./images/3.png" alt="3.png" /></p>
+
+<h2 id="docbuilder">DocBuilder</h2>
+
+<p>借鉴GitBook的思路，开发了一个DocBuilder，下面是架构图：</p>
+
+<p><img src="./images/image2020-7-16_17-37-33.png" alt="image2020-7-16_17-37-33.png" /></p>
+
+<p>除了最核心的扫描目录，解析 Markdown，生成JSON之外，针对 Markdown 做了一些语法上的拓展。比如输入
+<code>@dchat张伦(zhanglun)</code>会解析成一个<strong>内容为“张伦”，点击打开公司 IM 的 a 标签</strong>；输入<code>:::info  :::</code>可以创建一个info类型的提示区域等等。未来还会支持PDF, PPT文件的预览。</p>
+
+<h2 id="提升开发体验">提升开发体验</h2>
+
+<p>为了让编辑人员在写文档的时候能有写代码的感受。通过工程化的角度，对整个流程做了一下小小的优化。docbuilder除了核心的构建能力之外，还提供了快速初始化，语法检查和本地预览启动的功能。使用也很简单，安装之后通过几个命令就使用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 安装</span>
+npm i -g docbuilder
+
+<span class="c1"># 初始化文档项目。包含约定的目录结构和ci配置</span>
+docbuilder init
+
+<span class="c1"># 本地启动预览</span>
+docbuilder serve</code></pre></td></tr></table>
+</div>
+</div>
+<p>当编辑完成之后，只需要将代码推送到远端master分支，触发持续集成之后，开始构建和打包。最后将数据导入数据库，实现自动更新。</p>
+
+<h2 id="增加内容反馈-帮助提升文档质量">增加内容反馈，帮助提升文档质量</h2>
+
+<p>为了让用户和文档中心形成一个较好的沟通体系，在每一篇文档中的最底部都增加了针对这篇文档的反馈入口，效果如图下所示：</p>
+
+<p><img src="./images/Xnip2021-06-13_15-11-20.png" alt="Xnip2021-06-13_15-11-20.png" /></p>
+
+<p>在数据库的设计中，增加了一张feedback表，用于统计信息。用户每反馈一次便增加一条数据。同时在后台按照每个服务的维度做了数据统计，包括总数，每日新增，已回复，未处理等。服务团队可以按需派人针对收集到的问题对文档内容进行改进。</p>
+
+<h2 id="结束语">结束语</h2>
+
+<p>其实整个系统在设计和落地过程中远比上文描述的要复杂。更多的细节就不在文中细说。从技术难度的角度上来说，当我完成并落地之后，并不认为难度有多高。相反我认为实现需要一定的创造力和想象力，熟悉工具及其背后原理，才能将不同的环节串联在一起。在第一版上线之后，还化身“客服”的角色，推动服务方接入，这是从未有过的经历，虽然前期很痛苦，但是好在坚持下来，接入文档的服务方慢慢的增加。我自己也一直是以接入方的视角来思考如何推动更多服务的接入，比如提供了预览环境支持上线前的预览，提供接入指南，创建客服群增进沟通等等，后续还有跟多的想法希望在接下来的工作中能够逐步完善。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">张伦</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-14
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/post/2020/11/%E4%BD%BF%E7%94%A8-single-spa-%E5%AE%9E%E7%8E%B0%E5%BE%AE%E5%89%8D%E7%AB%AF/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">使用 single-spa 实现微前端</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/2020/09/zen-reborn-%E8%AE%A1%E5%88%92/">
+            <span class="next-text nav-default">Zen Reborn 计划</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:zhanglun1410@gmail.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/zhanglun" class="iconfont icon-github" title="github"></a>
+  <a href="https://zhanglun.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2014 - 
+    2021
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">张伦</span>
+  </span>
+</div>
+
+
+<script data-ad-client="ca-pub-1266464468166844" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-50406624-2', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script id="baidu_push">
+  (function(){
+    if (window.location.hostname === 'localhost') return;
+    var bp = document.createElement('script'); bp.async = true;
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+      bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+      bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
